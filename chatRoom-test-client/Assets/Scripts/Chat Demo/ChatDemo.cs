@@ -66,10 +66,10 @@ namespace Chat_Demo
         #region PRIVATE_VARIABLES
 
         private long _playerId = 0;
-        private IBeamableAPI _beamContext;
-        private BeamContext _beamContextActive;
-        private BeamContext _beamContextP1;
-        private BeamContext _beamContextP2;
+        private IBeamableAPI _beamContext = null;
+        private BeamContext _beamContextActive = null;
+        private BeamContext _beamContextP1 = null;
+        private BeamContext _beamContextP2 = null;
         private ChatView _chatView = null;
         private ChatServiceExampleData _data = new ChatServiceExampleData();
         private List<Button> _instantiatedRoomsButtons = new List<Button>();
@@ -100,7 +100,7 @@ namespace Chat_Demo
             _beamContextActive = ctx;
             
             _playerId = _beamContextActive.Api.User.id;
-            
+            playerIdTmp.text = _playerId.ToString();
             _beamContextActive.Api.Experimental.ChatService.Subscribe(chatView =>
             {
                 _chatView = chatView;
@@ -117,37 +117,6 @@ namespace Chat_Demo
 
             logsDisplay.text += $"\n Active Player Set To {playerCode}" +
                                 $"\n ID =  {_playerId}";
-        }
-
-        public void SetPlayerOne()
-        {
-            SetActiveBeamContext(_beamContextP1, _playerOneCode);
-            createRoomBackButton.enabled = false;
-            playerSelectBackButton.enabled = true;
-            roomContainer.SetActive(false);
-            createRoomContainer.SetActive(true);
-            playerSelectContainer.SetActive(false);
-        }
-        
-        public void SetPlayerTwo()
-        {
-            SetActiveBeamContext(_beamContextP2, _playerTwoCode);
-            createRoomBackButton.enabled = false;
-            playerSelectBackButton.enabled = true;
-            roomContainer.SetActive(false);
-            createRoomContainer.SetActive(true);
-            playerSelectContainer.SetActive(false);
-        }
-
-        public void GoBackToPlayerSelect()
-        {
-            createRoomBackButton.enabled = false;
-            playerSelectBackButton.enabled = false;
-            _beamContextActive = null;
-            roomContainer.SetActive(false);
-            createRoomContainer.SetActive(false);
-            playerSelectContainer.SetActive(true);
-            
         }
         
         private async void SetupBeamable()
@@ -185,16 +154,20 @@ namespace Chat_Demo
         
         private void Room_OnMessageReceived(Message message)
         {
+            var ownMessage = message.gamerTag == _playerId;
             var roomMessage = $"{message.gamerTag}: {message.content}";
+            if (roomMessage == _data.MessageToSend) return;
             Debug.Log($"Room_OnMessageReceived() roomMessage = {roomMessage}");
-            AddMessagesText(roomMessage);
+            AddMessagesText(roomMessage, message.gamerTag);
             DebugLogs();
         }
         
-        private void AddMessagesText(string message)
+        private void AddMessagesText(string message, long gamerTag)
         {
+            var messageColor = gamerTag == _playerId ? "green" : "white";
             _data.RoomMessages.Add(message);
-            messageDisplayText.text += $"\n {message}";
+            _data.MessageToSend = message;
+            messageDisplayText.text += $"\n " + $"<color={messageColor}>{message}</color>";
             chatScrollRect.verticalNormalizedPosition = 0f;
         }
 
@@ -234,7 +207,7 @@ namespace Chat_Demo
 
         private void InstantiateRoomButton(string roomName)
         {
-            if (_instantiatedRoomsButtons.Any(room => room.name == roomName))
+            if (_instantiatedRoomsButtons.Any(room => room.name == roomName) && _instantiatedRoomsButtons.Count > 0)
             {
                 return;
             }
@@ -256,6 +229,15 @@ namespace Chat_Demo
             
             _instantiatedRoomsButtons.Remove(roomButton);
             Destroy(roomButton.gameObject);
+        }
+
+        private void RemoveAllRooms()
+        {
+            foreach (var roomButton in _instantiatedRoomsButtons)
+            {
+                Destroy(roomButton.gameObject);
+            }
+            _instantiatedRoomsButtons.Clear();
         }
 
         #endregion
@@ -311,8 +293,6 @@ namespace Chat_Demo
             _data.RoomToLeaveName = roomName;
             _data.RoomToCreateName = roomName;
             
-            
-
             var keepSubscribed = true;
             var players = new List<long>{_beamContextActive.Api.User.id};
             
@@ -321,9 +301,15 @@ namespace Chat_Demo
 
             foreach (var room in _chatView.roomHandles.Where(room => room.Id == result.id))
             {
-                foreach (var roomMessage in room.Messages.Select(message => $"{message.gamerTag}: {message.content}"))
+                // foreach (var roomMessage in room.Messages.Select(message => $"{message.gamerTag}: {message.content}"))
+                // {
+                //     AddMessagesText(roomMessage, roomMessage.Contains(_playerId.ToString()) ? _playerId : 0);
+                // }
+
+                foreach (var message in room.Messages)
                 {
-                    AddMessagesText(roomMessage);
+                    var roomMessage = $"{message.gamerTag}: {message.content}";
+                    AddMessagesText(roomMessage, message.gamerTag);
                 }
 
                 foreach (var playerName in room.Players.Select(player => $"{player}"))
@@ -335,7 +321,6 @@ namespace Chat_Demo
             
             roomIDTmp.text = roomName;
             _data.RoomId = result.id;
-            playerIdTmp.text = _beamContextActive.Api.User.id.ToString();
             
             DebugLogs();
             createRoomBackButton.enabled = true;
@@ -374,10 +359,47 @@ namespace Chat_Demo
             createRoomBackButton.enabled = false;
             playerSelectBackButton.enabled = true;
         }
+        
+        public void SetPlayerOne()
+        {
+            SetActiveBeamContext(_beamContextP1, _playerOneCode);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(true);
+            playerSelectContainer.SetActive(false);
+        }
+        
+        public void SetPlayerTwo()
+        {
+            SetActiveBeamContext(_beamContextP2, _playerTwoCode);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(true);
+            playerSelectContainer.SetActive(false);
+        }
 
+        public void GoBackToPlayerSelect()
+        {
+            roomIDTmp.text = "";
+            messageDisplayText.text = "";
+            playerIdTmp.text = "";
+            _data.MessageToSend = "";
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = false;
+            _beamContextActive = null;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(false);
+            playerSelectContainer.SetActive(true);
+            RemoveAllRooms();
+        }
+        
         public void GoBackToCreate()
         {
+            roomIDTmp.text = "";
             messageDisplayText.text = "";
+            _data.MessageToSend = "";
             createRoomContainer.SetActive(true);
             roomContainer.SetActive(false);
         }
