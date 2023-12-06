@@ -59,6 +59,9 @@ namespace Chat_Demo
 
         private long _playerId = 0;
         private IBeamableAPI _beamContext;
+        private BeamContext _beamContextActive;
+        private BeamContext _beamContextP1;
+        private BeamContext _beamContextP2;
         private ChatView _chatView = null;
         private ChatServiceExampleData _data = new ChatServiceExampleData();
         private List<Button> _instantiatedRoomsButtons = new List<Button>();
@@ -67,23 +70,31 @@ namespace Chat_Demo
 
         #region UNITY_CALLS
 
-        private void Start()
+        private async void Start()
         {
             roomContainer.SetActive(false);
-            SetupBeamable();
+            await SetupBeamable();
         }
 
         #endregion
 
         #region PRIVATE_METHODS
+
+        private void SetActiveBeamContext(BeamContext ctx)
+        {
+            _beamContextActive = ctx;
+        }
         
-        private async void SetupBeamable()
+        private Task SetupBeamable()
         {
             logsDisplay.text = $"Beamable Setup started...";
-            _beamContext = await Beamable.API.Instance;
-            _playerId = _beamContext.User.id;
+            // _beamContext = await Beamable.API.Instance;
+            _beamContextP1 =  BeamContext.ForPlayer("Player1");
+            SetActiveBeamContext(_beamContextP1);
             
-             _beamContext.Experimental.ChatService.Subscribe(chatView =>
+            _playerId = _beamContextActive.Api.User.id;
+            
+            _beamContextActive.Api.Experimental.ChatService.Subscribe(chatView =>
             {
                 _chatView = chatView;
 
@@ -121,7 +132,7 @@ namespace Chat_Demo
              logsDisplay.text += $"\n Beamable Setup done" +
                                  $"\n Player ID = {_playerId}";
              DebugLogs();
-
+             return Task.CompletedTask;
         }
 
         private void Room_OnRemoved()
@@ -168,7 +179,7 @@ namespace Chat_Demo
             bool isProfanityText = true;
             try
             {
-                var result = await _beamContext.Experimental.ChatService.ProfanityAssert(text);
+                var result = await _beamContextActive.Api.Experimental.ChatService.ProfanityAssert(text);
                 isProfanityText = false;
             }
             catch
@@ -241,7 +252,7 @@ namespace Chat_Demo
         [ContextMenu("JoinRoom")]
         public async void JoinRoom()
         {
-            var result = await _beamContext.Experimental.ChatService.GetMyRooms();
+            var result = await _beamContextActive.Api.Experimental.ChatService.GetMyRooms();
             foreach (var info in result)
             {
                 Debug.Log($"My Room = {info.players} {info.id}");
@@ -261,9 +272,9 @@ namespace Chat_Demo
             
 
             var keepSubscribed = true;
-            var players = new List<long>{_beamContext.User.id};
+            var players = new List<long>{_beamContextActive.Api.User.id};
             
-            var result = await _beamContext.Experimental.ChatService.CreateRoom(
+            var result = await _beamContextActive.Api.Experimental.ChatService.CreateRoom(
                 roomName, keepSubscribed, players);
 
             foreach (var room in _chatView.roomHandles.Where(room => room.Id == result.id))
@@ -282,7 +293,7 @@ namespace Chat_Demo
             
             roomIDTmp.text = roomName;
             _data.RoomId = result.id;
-            playerIdTmp.text = _beamContext.User.id.ToString();
+            playerIdTmp.text = _beamContextActive.Api.User.id.ToString();
             
             DebugLogs();
             roomContainer.SetActive(true);
@@ -292,11 +303,11 @@ namespace Chat_Demo
         [ContextMenu("LeaveAllMyRooms")]
         public async void LeaveAllMyRooms()
         {
-            var roomInfos = await _beamContext.Experimental.ChatService.GetMyRooms();
+            var roomInfos = await _beamContextActive.Api.Experimental.ChatService.GetMyRooms();
             
             foreach(var roomInfo in roomInfos)
             {
-                await _beamContext.Experimental.ChatService.LeaveRoom(roomInfo.id);
+                await _beamContextActive.Api.Experimental.ChatService.LeaveRoom(roomInfo.id);
                 RemoveRoomButton(roomInfo.name);
             }
     
@@ -308,7 +319,7 @@ namespace Chat_Demo
 
         public async void LeaveRoom()
         {
-            await _beamContext.Experimental.ChatService.LeaveRoom(_data.RoomId);
+            await _beamContextActive.Api.Experimental.ChatService.LeaveRoom(_data.RoomId);
             RemoveRoomButton(_data.RoomToLeaveName);
             DebugLogs();
             
