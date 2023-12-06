@@ -856,16 +856,16 @@ MonoBehaviour:
   logsDisplay: {fileID: 807528035}
   roomNameInputField: {fileID: 1508929953}
   createRoomContainer: {fileID: 1188239823}
-  createRoomBackButton: {fileID: 0}
+  createRoomBackButton: {fileID: 1709131227}
   messageDisplayText: {fileID: 1072237511}
   messageInputField: {fileID: 828266154}
   sendMessageButton: {fileID: 441578322}
   roomContainer: {fileID: 1454387400}
   chatScrollRect: {fileID: 1360163216}
-  playerSelectContainer: {fileID: 0}
-  playerOneButton: {fileID: 0}
-  playerTwoButton: {fileID: 0}
-  playerSelectBackButton: {fileID: 0}
+  playerSelectContainer: {fileID: 1434737119}
+  playerOneButton: {fileID: 58345702}
+  playerTwoButton: {fileID: 326424720}
+  playerSelectBackButton: {fileID: 4728911}
   roomNameButton: {fileID: 4495681222541638741, guid: a3d64ee3af99bcc47a41d3bf31aca010, type: 3}
   roomNamesParentTransform: {fileID: 3201563114144751550}
 --- !u!4 &226013350
@@ -2962,8 +2962,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 540622194}
   m_HandleRect: {fileID: 540622193}
   m_Direction: 2
-  m_Value: -0.0000010569854
-  m_Size: 0.50244
+  m_Value: 0
+  m_Size: 0.009712509
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3860,8 +3860,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 635.1907}
-  m_SizeDelta: {x: 0, y: 1276.61}
+  m_AnchoredPosition: {x: 0, y: -0.00007605553}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1627032010
 MonoBehaviour:
@@ -3902,7 +3902,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
-  m_VerticalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &1684023394
 GameObject:
   m_ObjectHideFlags: 0

@@ -173,7 +173,7 @@ namespace Chat_Demo
             //         room.OnRemoved += Room_OnRemoved;
             //     }
             // });
-
+            playerSelectContainer.SetActive(true);
             logsDisplay.text += $"\n Beamable Setup done";
         }
 
