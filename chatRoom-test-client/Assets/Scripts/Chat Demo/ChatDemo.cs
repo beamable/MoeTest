@@ -41,6 +41,7 @@ namespace Chat_Demo
         [Header("Create Room")]
         [SerializeField] private TMP_InputField roomNameInputField = null;
         [SerializeField] private GameObject createRoomContainer = null;
+        [SerializeField] private Button createRoomBackButton = null;
 
         [Header("Chat Room")]
         [SerializeField] private TextMeshProUGUI messageDisplayText = null;
@@ -48,6 +49,13 @@ namespace Chat_Demo
         [SerializeField] private Button sendMessageButton = null;
         [SerializeField] private GameObject roomContainer = null;
         [SerializeField] private ScrollRect chatScrollRect = null;
+
+        [Header("Players Select")] 
+        [SerializeField] private GameObject playerSelectContainer = null;
+        [SerializeField] private Button playerOneButton = null;
+        [SerializeField] private Button playerTwoButton = null;
+        [SerializeField] private Button playerSelectBackButton = null;
+
         
         [Header("Room Prefab")]
         [SerializeField] private Button roomNameButton = null;
@@ -65,6 +73,9 @@ namespace Chat_Demo
         private ChatView _chatView = null;
         private ChatServiceExampleData _data = new ChatServiceExampleData();
         private List<Button> _instantiatedRoomsButtons = new List<Button>();
+        
+        private const string _playerOneCode = "Player1";
+        private const string _playerTwoCode = "Player2";
 
         #endregion
 
@@ -72,67 +83,98 @@ namespace Chat_Demo
 
         private async void Start()
         {
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = false;
             roomContainer.SetActive(false);
-            await SetupBeamable();
+            createRoomContainer.SetActive(false);
+            playerSelectContainer.SetActive(false);
+            SetupBeamable();
         }
 
         #endregion
 
         #region PRIVATE_METHODS
 
-        private void SetActiveBeamContext(BeamContext ctx)
+        private void SetActiveBeamContext(BeamContext ctx, string playerCode)
         {
             _beamContextActive = ctx;
-        }
-        
-        private Task SetupBeamable()
-        {
-            logsDisplay.text = $"Beamable Setup started...";
-            // _beamContext = await Beamable.API.Instance;
-            _beamContextP1 =  BeamContext.ForPlayer("Player1");
-            SetActiveBeamContext(_beamContextP1);
             
             _playerId = _beamContextActive.Api.User.id;
             
             _beamContextActive.Api.Experimental.ChatService.Subscribe(chatView =>
             {
                 _chatView = chatView;
-
                 foreach (var room in chatView.roomHandles)
                 {
-                    room.OnRemoved += Room_OnRemoved;
-
                     var roomName = $"{room.Name}";
                     InstantiateRoomButton(roomName);
 
-                    room.Subscribe().Then(x =>
-                    {
-                       // _data.RoomMessages.Clear();
-                       // _data.RoomPlayers.Clear();
-                       // _data.RoomToLeaveName = room.Name;
-                       //
-                       // foreach (var message in room.Messages)
-                       // {
-                       //     var roomMessage = $"{message.gamerTag}: {message.content}";
-                       //     AddMessagesText(roomMessage);
-                       // }
-                       //
-                       // foreach (var player in room.Players)
-                       // {
-                       //     var playerName = $"{player}";
-                       //     _data.RoomPlayers.Add(playerName);
-                       // }
-                       
-                    });
-                    
+                    room.Subscribe();
                     room.OnMessageReceived += Room_OnMessageReceived;
+                    room.OnRemoved += Room_OnRemoved;
                 }
             });
 
-             logsDisplay.text += $"\n Beamable Setup done" +
-                                 $"\n Player ID = {_playerId}";
-             DebugLogs();
-             return Task.CompletedTask;
+            logsDisplay.text += $"\n Active Player Set To {playerCode}" +
+                                $"\n ID =  {_playerId}";
+        }
+
+        public void SetPlayerOne()
+        {
+            SetActiveBeamContext(_beamContextP1, _playerOneCode);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(true);
+            playerSelectContainer.SetActive(false);
+        }
+        
+        public void SetPlayerTwo()
+        {
+            SetActiveBeamContext(_beamContextP2, _playerTwoCode);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(true);
+            playerSelectContainer.SetActive(false);
+        }
+
+        public void GoBackToPlayerSelect()
+        {
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = false;
+            _beamContextActive = null;
+            roomContainer.SetActive(false);
+            createRoomContainer.SetActive(false);
+            playerSelectContainer.SetActive(true);
+            
+        }
+        
+        private async void SetupBeamable()
+        {
+            logsDisplay.text = $"Beamable Setup started...";
+            // _beamContext = await Beamable.API.Instance;
+            _beamContextP1 =  await BeamContext.ForPlayer(_playerOneCode).Instance;
+            _beamContextP2 =  await BeamContext.ForPlayer(_playerTwoCode).Instance;
+            // SetActiveBeamContext(_beamContextP1);
+            //
+            // _playerId = _beamContextActive.Api.User.id;
+            //
+            // _beamContextActive.Api.Experimental.ChatService.Subscribe(chatView =>
+            // {
+            //     _chatView = chatView;
+            //     foreach (var room in chatView.roomHandles)
+            //     {
+            //         var roomName = $"{room.Name}";
+            //         InstantiateRoomButton(roomName);
+            //
+            //         room.Subscribe();
+            //         room.OnMessageReceived += Room_OnMessageReceived;
+            //         room.OnRemoved += Room_OnRemoved;
+            //     }
+            // });
+
+            logsDisplay.text += $"\n Beamable Setup done";
         }
 
         private void Room_OnRemoved()
@@ -296,6 +338,8 @@ namespace Chat_Demo
             playerIdTmp.text = _beamContextActive.Api.User.id.ToString();
             
             DebugLogs();
+            createRoomBackButton.enabled = true;
+            playerSelectBackButton.enabled = true;
             roomContainer.SetActive(true);
             createRoomContainer.SetActive(false);
         }
@@ -315,6 +359,8 @@ namespace Chat_Demo
             
             createRoomContainer.SetActive(true);
             roomContainer.SetActive(false);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
         }
 
         public async void LeaveRoom()
@@ -325,6 +371,8 @@ namespace Chat_Demo
             
             createRoomContainer.SetActive(true);
             roomContainer.SetActive(false);
+            createRoomBackButton.enabled = false;
+            playerSelectBackButton.enabled = true;
         }
 
         public void GoBackToCreate()
