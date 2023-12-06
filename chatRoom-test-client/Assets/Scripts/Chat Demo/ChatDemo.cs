@@ -81,7 +81,7 @@ namespace Chat_Demo
 
         #region UNITY_CALLS
 
-        private async void Start()
+        private void Start()
         {
             createRoomBackButton.enabled = false;
             playerSelectBackButton.enabled = false;
@@ -231,7 +231,7 @@ namespace Chat_Demo
             Destroy(roomButton.gameObject);
         }
 
-        private void RemoveAllRooms()
+        private void DestroyRoomButtons()
         {
             foreach (var roomButton in _instantiatedRoomsButtons)
             {
@@ -276,10 +276,19 @@ namespace Chat_Demo
         [ContextMenu("JoinRoom")]
         public async void JoinRoom()
         {
+            var roomName = roomNameInputField.text;
+            _data.RoomNames.Clear();
+            _data.RoomPlayers.Clear();
+            _data.RoomMessages.Clear();
+            _data.RoomNames.Add(roomName);
+            _data.RoomToLeaveName = roomName;
+            _data.RoomToCreateName = roomName;
+            
             var result = await _beamContextActive.Api.Experimental.ChatService.GetMyRooms();
             foreach (var info in result)
             {
-                Debug.Log($"My Room = {info.players} {info.id}");
+                Debug.Log($"info.name = {info.name}");
+                Debug.Log("Players " + string.Join(", ", info.players));
             }
         }
         
@@ -392,7 +401,7 @@ namespace Chat_Demo
             roomContainer.SetActive(false);
             createRoomContainer.SetActive(false);
             playerSelectContainer.SetActive(true);
-            RemoveAllRooms();
+            DestroyRoomButtons();
         }
         
         public void GoBackToCreate()
