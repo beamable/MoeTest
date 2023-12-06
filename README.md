@@ -30,7 +30,7 @@ There are several sample projects related to Chat.
 
 # Overview: Chat Vanilla Test
 
-### What is "Global Price Wars"?
+### What is "Chat Vanilla Test"?
 This project is a demonstration representing the core functions of the chat service. It shows the possibility of adding more than one local player.
 The project includes: 
   - Two Players
