@@ -114,6 +114,8 @@ namespace Chat_Demo
                     var roomName = $"{room.Name}";
                     InstantiateRoomButton(roomName);
 
+                    room.OnMessageReceived -= Room_OnMessageReceived;
+                    room.OnRemoved -= Room_OnRemoved;
                     room.Subscribe();
                     room.OnMessageReceived += Room_OnMessageReceived;
                     room.OnRemoved += Room_OnRemoved;
