@@ -29,23 +29,28 @@ There are several sample projects related to Chat.
 
 # Overview: Chat Vanilla Test
 
-### What is "Chat Vanilla Test"?
+## What is "Chat Vanilla Test"?
 This project is a demonstration representing the core functions of the chat service. It shows the possibility of adding more than one local player.
 The project includes: 
   - Two Players
   - Your Rooms Selection
   - Create/Join/Leave Chat Rooms
+###Important Note:
+The project is configured for more than one local players which is using the BeamContext.ForPlayer(string playerCode).Instance method instead of the
+Default Context.
+If you want to use the Default context please remove the symbol definition in Edit/Project Settings/Player/Other Settings/Script Compilation and
+remove the BEAMABLE_ENABLE_BEAM_CONTEXT_DEFAULT_OVERRIDE.
 
-### What is Beamable?
+## What is Beamable?
 Beamable is the low-code option for rapidly adding social, 
 commerce, and content management features to your live game. 
 Learn how to do that with Beamable's online product documentation.
 <br>[docs.beamable.com](https://docs.beamable.com/)
 
-### What is Beamable's "Chat" Feature?
+## What is Beamable's "Chat" Feature?
 The purpose of this feature is to allow players to communicate in-game.
 <br>[Beamable Chat](https://docs.beamable.com/docs/chat-feature)
 
-### Got feedback?
+## Got feedback?
 Let us know what you think or ask any questions you might have.
 <br>[Contact Us](https://docs.beamable.com/discuss)
