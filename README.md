@@ -35,7 +35,8 @@ The project includes:
   - Two Players
   - Your Rooms Selection
   - Create/Join/Leave Chat Rooms
-###Important Note:
+
+>Important Note:
 The project is configured for more than one local players which is using the BeamContext.ForPlayer(string playerCode).Instance method instead of the
 Default Context.
 If you want to use the Default context please remove the symbol definition in Edit/Project Settings/Player/Other Settings/Script Compilation and
