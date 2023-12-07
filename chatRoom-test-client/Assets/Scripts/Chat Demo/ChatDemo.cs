@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Beamable;
 using UnityEngine;
-using Beamable.Common.Api;
 using Beamable.Experimental.Api.Chat;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Chat_Demo
@@ -26,9 +22,6 @@ namespace Chat_Demo
         public string RoomId;
     }
    
-    [System.Serializable]
-    public class RefreshedUnityEvent : UnityEvent<ChatServiceExampleData> { }
-    
     public class ChatDemo : MonoBehaviour
     {
         #region EXPOSED_VARIABLES
@@ -95,6 +88,18 @@ namespace Chat_Demo
 
         #region PRIVATE_METHODS
 
+        #region Setup Beamable
+
+        private async void SetupBeamable()
+        {
+            logsDisplay.text = $"Beamable Setup started...";
+            _beamContextP1 =  await BeamContext.ForPlayer(_playerOneCode).Instance;
+            _beamContextP2 =  await BeamContext.ForPlayer(_playerTwoCode).Instance;
+            playerSelectContainer.SetActive(true);
+            logsDisplay.text += $"\n Beamable Setup done";
+        }
+        
+        //Set active Beamable Context based on selected local player
         private void SetActiveBeamContext(BeamContext ctx, string playerCode)
         {
             _beamContextActive = ctx;
@@ -118,34 +123,12 @@ namespace Chat_Demo
             logsDisplay.text += $"\n Active Player Set To {playerCode}" +
                                 $"\n ID =  {_playerId}";
         }
-        
-        private async void SetupBeamable()
-        {
-            logsDisplay.text = $"Beamable Setup started...";
-            // _beamContext = await Beamable.API.Instance;
-            _beamContextP1 =  await BeamContext.ForPlayer(_playerOneCode).Instance;
-            _beamContextP2 =  await BeamContext.ForPlayer(_playerTwoCode).Instance;
-            // SetActiveBeamContext(_beamContextP1);
-            //
-            // _playerId = _beamContextActive.Api.User.id;
-            //
-            // _beamContextActive.Api.Experimental.ChatService.Subscribe(chatView =>
-            // {
-            //     _chatView = chatView;
-            //     foreach (var room in chatView.roomHandles)
-            //     {
-            //         var roomName = $"{room.Name}";
-            //         InstantiateRoomButton(roomName);
-            //
-            //         room.Subscribe();
-            //         room.OnMessageReceived += Room_OnMessageReceived;
-            //         room.OnRemoved += Room_OnRemoved;
-            //     }
-            // });
-            playerSelectContainer.SetActive(true);
-            logsDisplay.text += $"\n Beamable Setup done";
-        }
 
+        #endregion
+        
+
+        #region Roon Events
+        
         private void Room_OnRemoved()
         {
             Debug.Log($"Room_OnRemoved");
@@ -162,15 +145,8 @@ namespace Chat_Demo
             DebugLogs();
         }
         
-        private void AddMessagesText(string message, long gamerTag)
-        {
-            var messageColor = gamerTag == _playerId ? "green" : "white";
-            _data.RoomMessages.Add(message);
-            _data.MessageToSend = message;
-            messageDisplayText.text += $"\n " + $"<color={messageColor}>{message}</color>";
-            chatScrollRect.verticalNormalizedPosition = 0f;
-        }
-
+        #endregion
+        
         private void DebugLogs()
         {
             _data.IsInRoom = _data.RoomPlayers.Count > 0;
@@ -184,11 +160,19 @@ namespace Chat_Demo
                                 $"\n IsInRoom = {_data.IsInRoom}\n\n";
             
             logsDisplay.text += refreshLog;
-            
-            // Send relevant data to the UI for rendering
-            // OnRefreshed?.Invoke(_data);
         }
         
+        //Update the chat message display with received messages
+        private void AddMessagesText(string message, long gamerTag)
+        {
+            var messageColor = gamerTag == _playerId ? "green" : "white";
+            _data.RoomMessages.Add(message);
+            _data.MessageToSend = message;
+            messageDisplayText.text += $"\n " + $"<color={messageColor}>{message}</color>";
+            chatScrollRect.verticalNormalizedPosition = 0f;
+        }
+        
+        //Check if the message contains profanity
         private async Task<bool> IsProfanity(string text)
         {
             bool isProfanityText = true;
@@ -205,6 +189,7 @@ namespace Chat_Demo
             return isProfanityText;
         }
 
+        //Instantiate MY ROOMS buttons
         private void InstantiateRoomButton(string roomName)
         {
             if (_instantiatedRoomsButtons.Any(room => room.name == roomName) && _instantiatedRoomsButtons.Count > 0)
@@ -222,6 +207,7 @@ namespace Chat_Demo
             _instantiatedRoomsButtons.Add(roomButton);
         }
         
+        //Remove a room button after leaving a room
         private void RemoveRoomButton(string roomName)
         {
             var roomButton = _instantiatedRoomsButtons.FirstOrDefault(room => room.name == roomName);
@@ -231,6 +217,7 @@ namespace Chat_Demo
             Destroy(roomButton.gameObject);
         }
 
+        //Destroy all instantiated room buttons 
         private void DestroyRoomButtons()
         {
             foreach (var roomButton in _instantiatedRoomsButtons)
@@ -244,6 +231,7 @@ namespace Chat_Demo
 
         #region PUBLIC_METHODS
         
+        //OnClick Button Event for Send Message
         public async void SendRoomMessage()
         {
             Debug.Log("SendRoomMessage()");
@@ -272,26 +260,8 @@ namespace Chat_Demo
             sendMessageButton.enabled = true;
             messageInputField.text = "";
         }
-
-        [ContextMenu("JoinRoom")]
-        public async void JoinRoom()
-        {
-            var roomName = roomNameInputField.text;
-            _data.RoomNames.Clear();
-            _data.RoomPlayers.Clear();
-            _data.RoomMessages.Clear();
-            _data.RoomNames.Add(roomName);
-            _data.RoomToLeaveName = roomName;
-            _data.RoomToCreateName = roomName;
-            
-            var result = await _beamContextActive.Api.Experimental.ChatService.GetMyRooms();
-            foreach (var info in result)
-            {
-                Debug.Log($"info.name = {info.name}");
-                Debug.Log("Players " + string.Join(", ", info.players));
-            }
-        }
         
+        //OnClick Button Event to Create OR Join a Room
         public async void CreateRoom()
         {
             var roomName = roomNameInputField.text;
@@ -307,14 +277,8 @@ namespace Chat_Demo
             
             var result = await _beamContextActive.Api.Experimental.ChatService.CreateRoom(
                 roomName, keepSubscribed, players);
-
             foreach (var room in _chatView.roomHandles.Where(room => room.Id == result.id))
             {
-                // foreach (var roomMessage in room.Messages.Select(message => $"{message.gamerTag}: {message.content}"))
-                // {
-                //     AddMessagesText(roomMessage, roomMessage.Contains(_playerId.ToString()) ? _playerId : 0);
-                // }
-
                 foreach (var message in room.Messages)
                 {
                     var roomMessage = $"{message.gamerTag}: {message.content}";
@@ -338,6 +302,7 @@ namespace Chat_Demo
             createRoomContainer.SetActive(false);
         }
         
+        //Leave all rooms test method
         [ContextMenu("LeaveAllMyRooms")]
         public async void LeaveAllMyRooms()
         {
@@ -357,6 +322,7 @@ namespace Chat_Demo
             playerSelectBackButton.enabled = true;
         }
 
+        //OnClick Button Event to Leave a Room
         public async void LeaveRoom()
         {
             await _beamContextActive.Api.Experimental.ChatService.LeaveRoom(_data.RoomId);
@@ -368,7 +334,9 @@ namespace Chat_Demo
             createRoomBackButton.enabled = false;
             playerSelectBackButton.enabled = true;
         }
-        
+
+        #region OnClick Events for Player Select
+
         public void SetPlayerOne()
         {
             SetActiveBeamContext(_beamContextP1, _playerOneCode);
@@ -388,6 +356,8 @@ namespace Chat_Demo
             createRoomContainer.SetActive(true);
             playerSelectContainer.SetActive(false);
         }
+
+        #endregion
 
         public void GoBackToPlayerSelect()
         {
@@ -414,7 +384,5 @@ namespace Chat_Demo
         }
 
         #endregion
-
-
     }
 }
