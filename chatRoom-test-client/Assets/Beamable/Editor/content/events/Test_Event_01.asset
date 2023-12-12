@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tags: []
   name: Test Event 01
-  startDate: 2023-12-12T15:08:51Z
+  startDate: 2023-12-12T16:05:00Z
   partitionSize: 1
   cohortSettings:
     HasValue: 0
@@ -24,17 +24,29 @@ MonoBehaviour:
   phases:
     listData:
     - name: Phase A
-      durationMinutes: 2
+      durationMinutes: 3
       rules:
       - rule: collect gems
         value: 5
     - name: Phase B
-      durationMinutes: 2
+      durationMinutes: 3
       rules:
       - rule: collect gems
         value: 10
   scoreRewards:
-  - min: 15
+  - min: 1
+    max:
+      HasValue: 0
+      Value: 0
+    currencies:
+      HasValue: 1
+      Value:
+      - id: currency.gems
+        amount: 25
+    items:
+      HasValue: 0
+      Value: []
+  - min: 1
     max:
       HasValue: 0
       Value: 0
@@ -61,7 +73,7 @@ MonoBehaviour:
   groupRewards:
     scoreRewards: []
   permissions:
-    writeSelf: 0
+    writeSelf: 1
   schedule:
     HasValue: 0
     Value:
