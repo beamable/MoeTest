@@ -1149,6 +1149,7 @@ GameObject:
   - component: {fileID: 1570917378}
   - component: {fileID: 1570917377}
   - component: {fileID: 1570917381}
+  - component: {fileID: 1570917382}
   m_Layer: 5
   m_Name: Events Canvas
   m_TagString: Untagged
@@ -1254,6 +1255,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugger: {fileID: 944341773372826089}
   scoreInputField: {fileID: 1918080191}
+--- !u!114 &1570917382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1570917376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc47450198624e20981670ac42aff13b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  assetReference:
+    m_AssetGUID: f819a6beb22c04c8d9f8222f930252b5
+    m_SubObjectName: icon
+    m_SubObjectType: UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    m_CachedAsset: {fileID: 2800000, guid: f819a6beb22c04c8d9f8222f930252b5, type: 3}
+    m_CachedGUID: f819a6beb22c04c8d9f8222f930252b5
+    m_EditorAssetChanged: 1
 --- !u!1 &1686040959
 GameObject:
   m_ObjectHideFlags: 0

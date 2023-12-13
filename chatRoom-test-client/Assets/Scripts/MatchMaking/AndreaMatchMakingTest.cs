@@ -25,6 +25,7 @@ namespace MatchMaking
     public class MatchmakingServiceExampleData
     {
         public SessionState SessionState = SessionState.None;
+        public string MatchId = "";
         public bool CanStart { get { return SessionState == SessionState.Disconnected;}} 
         public bool CanCancel { get { return SessionState == SessionState.Connected;}} 
     }
@@ -71,7 +72,6 @@ namespace MatchMaking
 
         private async void SetupBeamable()
         {
-            await Task.Delay(2000);
             _myDebugger.SimpleDebug("Beamable Setup Start...");
             _beamContext = await BeamContext.Default.Instance;
             _simGameType = await gameTypeRef.Resolve();
